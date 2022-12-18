@@ -35,6 +35,7 @@ export const Main = () => {
 
             socket.on('start-game', (user: string) => {
                 console.log(user);
+                setClient((old) => ({...old, isPlaying: true}));
             });
 
             socket.on('refresh-connected-users', (userNames: Array<string>) => {

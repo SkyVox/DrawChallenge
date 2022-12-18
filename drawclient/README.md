@@ -14,3 +14,4 @@ TODOS:
     [ ] - 5min timer limit to draw.
     [ ] - Be able to draw together.
     [ ] - Create chat, so users can discuss about their drawings.
+    [ ] - Way to see when board is locked.

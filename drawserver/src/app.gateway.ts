@@ -10,6 +10,7 @@ export class AppGateway {
 
     usersAwaiting: string[] = [];
 
+    // When player connect, send a message if the game already started to update the timer.
     @SubscribeMessage('user-connected')
     handleUserConnect(@MessageBody() data: string, @ConnectedSocket() client: any): string {
         const userId = uuidv4();
@@ -37,18 +38,26 @@ export class AppGateway {
         const message = data.message;
         const userId = data.userId;
         if (message.startsWith('/start')) {
+            const clientMessage = {
+                user: 'Server',
+                time: new Date().toLocaleTimeString('pt-BR')
+            }
+
             if (this.usersAwaiting.includes(userId)) {
-                client.emit('send-client-message', 'You are already on the queue list. Please wait more users.');
+                clientMessage['message'] = 'You are already on the queue list. Please wait more users.';
+                client.emit('send-client-message', clientMessage);
                 return message;
             }
 
             if (this.usersAwaiting.length === 2) {
-                client.emit('send-client-message', 'This game is full.');
+                clientMessage['message'] = 'This game is full.';
+                client.emit('send-client-message', clientMessage);
                 return message;
             }
 
             this.usersAwaiting.push(userId);
-            client.emit('send-client-message', `Successfully registered, queued users: ${this.usersAwaiting.length}.`);
+            clientMessage['message'] = `Successfully registered, queued users: ${this.usersAwaiting.length}.`;
+            client.emit('send-client-message', clientMessage);
             this.handleGameStart();
             return message;
         }
@@ -70,8 +79,8 @@ export class AppGateway {
         if (this.usersAwaiting.length === 2) {
             const object = this.pickRandomObject();
             this.usersAwaiting.forEach((id: string) => {
-                this.connectedUsers[id].client.emit('start-game', id);
-                this.connectedUsers[id].client.emit('send-client-message', `Game has started, you should draw ${object}`);
+                this.connectedUsers[id.toUpperCase()].client.emit('start-game', id);
+                this.connectedUsers[id.toUpperCase()].client.emit('send-client-message', `Game has started, you should draw ${object}`);
                 console.log('iniciando jogo para:', id);
             });
         }

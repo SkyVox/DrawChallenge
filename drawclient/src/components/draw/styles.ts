@@ -1,20 +1,29 @@
 import styled from 'styled-components';
 
 export const Container = styled.div`
-    display: flex;
-    align-items: center;
-    width: 60%;
+    &.main {
+        height: 90%;
+        width: 60%;
+        margin: 15px;
+    }
+
+    &.board {
+        height: 65%;
+    }
+
+    &.menu {
+        margin-top: 10px;
+    }
+
+    select {
+        height: 25px;
+    }
 `;
 
 export const Board = styled.div`
-    border: 1px solid black;
-    border-radius: 5px;
-    height: 400px;
-    width: 700px;
-    margin: 10px;
-`;
-
-export const Canvas = styled.canvas`
-    width: 100%;
+    border: 1px solid gray;
+    border-radius: 2px;
+    background-color: white;
     height: 100%;
+    width: 100%;
 `;
