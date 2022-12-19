@@ -11,8 +11,8 @@ export interface Client {
     userName: string;
     userId: string;
 
-    isPlaying?: boolean;
-    board?: any; // DrawBoard.
+    isPlaying: boolean;
+    boardImage: string;
 
     connectedClients: Array<string>; // Client UserNames.
 }
@@ -33,11 +33,6 @@ export const Main = () => {
                 setClient(user);
             });
 
-            socket.on('start-game', (user: string) => {
-                console.log(user);
-                setClient((old) => ({...old, isPlaying: true}));
-            });
-
             socket.on('refresh-connected-users', (userNames: Array<string>) => {
                 setClient((old) => ({
                     ...old,
@@ -54,7 +49,7 @@ export const Main = () => {
     return (
         <Container>
             <UserList user={client} />
-            <DrawBoard user={client} />
+            <DrawBoard user={client} setClient={setClient} />
             <Chat user={client} />
         </Container>
     );

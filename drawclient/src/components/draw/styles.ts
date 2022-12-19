@@ -15,7 +15,7 @@ export const Container = styled.div`
         margin-top: 10px;
     }
 
-    select {
+    select, button {
         height: 25px;
     }
 `;

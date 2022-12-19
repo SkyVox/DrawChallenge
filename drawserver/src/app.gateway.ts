@@ -10,6 +10,13 @@ export class AppGateway {
 
     usersAwaiting: string[] = [];
 
+    @SubscribeMessage('game-submit-board')
+    handleBoardSubmit(@MessageBody() data: any, @ConnectedSocket() client: Socket) {
+        const userId = data.userId;
+        const image = data.image;
+        this.connectedUsers[userId.toUpperCase()]['boardImage'] = image;
+    }
+
     // When player connect, send a message if the game already started to update the timer.
     @SubscribeMessage('user-connected')
     handleUserConnect(@MessageBody() data: string, @ConnectedSocket() client: any): string {
@@ -75,14 +82,36 @@ export class AppGateway {
         return message;
     }
 
+    timer = ms => new Promise(res => setTimeout(res, ms));
+
     handleGameStart() {
         if (this.usersAwaiting.length === 2) {
+            const time = 60 * 1;
             const object = this.pickRandomObject();
+
             this.usersAwaiting.forEach((id: string) => {
-                this.connectedUsers[id.toUpperCase()].client.emit('start-game', id);
+                this.connectedUsers[id.toUpperCase()].client.emit('start-game', {
+                    time: time,
+                    objectDraw: object
+                });
                 this.connectedUsers[id.toUpperCase()].client.emit('send-client-message', `Game has started, you should draw ${object}`);
-                console.log('iniciando jogo para:', id);
             });
+
+            setTimeout(async () => {
+                this.usersAwaiting.forEach((id: string) => {
+                    this.connectedUsers[id.toUpperCase()].client.emit('end-game', id);
+                });
+
+                for (const id of this.usersAwaiting) {
+                    const boardImage = this.connectedUsers[id.toUpperCase()].boardImage;
+
+                    Object.keys(this.connectedUsers).map((key: string) => {
+                        this.connectedUsers[key.toUpperCase()].client.emit('vote-board', boardImage);
+                    });
+
+                    await this.timer(10000);
+                }
+            }, time * 1000);
         }
     }
 
