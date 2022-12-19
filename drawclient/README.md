@@ -12,5 +12,6 @@ TODOS:
     [ ] - If lobby has more than two players, choose two random users.
     [ ] - When time is over, users in the lobby should be able to vote in a draw.
     [ ] - 5min timer limit to draw.
-    [ ] - Be able to draw together.
-    [ ] - Create chat, so users can discuss about their drawings.
+    [x] - Be able to draw together.
+    [x] - Create chat, so users can discuss about their drawings.
+    [ ] - Way to see when board is locked.

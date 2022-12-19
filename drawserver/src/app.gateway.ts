@@ -10,6 +10,14 @@ export class AppGateway {
 
     usersAwaiting: string[] = [];
 
+    @SubscribeMessage('game-submit-board')
+    handleBoardSubmit(@MessageBody() data: any, @ConnectedSocket() client: Socket) {
+        const userId = data.userId;
+        const image = data.image;
+        this.connectedUsers[userId.toUpperCase()]['boardImage'] = image;
+    }
+
+    // When player connect, send a message if the game already started to update the timer.
     @SubscribeMessage('user-connected')
     handleUserConnect(@MessageBody() data: string, @ConnectedSocket() client: any): string {
         const userId = uuidv4();
@@ -37,18 +45,26 @@ export class AppGateway {
         const message = data.message;
         const userId = data.userId;
         if (message.startsWith('/start')) {
+            const clientMessage = {
+                user: 'Server',
+                time: new Date().toLocaleTimeString('pt-BR')
+            }
+
             if (this.usersAwaiting.includes(userId)) {
-                client.emit('send-client-message', 'You are already on the queue list. Please wait more users.');
+                clientMessage['message'] = 'You are already on the queue list. Please wait more users.';
+                client.emit('send-client-message', clientMessage);
                 return message;
             }
 
             if (this.usersAwaiting.length === 2) {
-                client.emit('send-client-message', 'This game is full.');
+                clientMessage['message'] = 'This game is full.';
+                client.emit('send-client-message', clientMessage);
                 return message;
             }
 
             this.usersAwaiting.push(userId);
-            client.emit('send-client-message', `Successfully registered, queued users: ${this.usersAwaiting.length}.`);
+            clientMessage['message'] = `Successfully registered, queued users: ${this.usersAwaiting.length}.`;
+            client.emit('send-client-message', clientMessage);
             this.handleGameStart();
             return message;
         }
@@ -66,14 +82,36 @@ export class AppGateway {
         return message;
     }
 
+    timer = ms => new Promise(res => setTimeout(res, ms));
+
     handleGameStart() {
         if (this.usersAwaiting.length === 2) {
+            const time = 60 * 1;
             const object = this.pickRandomObject();
+
             this.usersAwaiting.forEach((id: string) => {
-                this.connectedUsers[id].client.emit('start-game', id);
-                this.connectedUsers[id].client.emit('send-client-message', `Game has started, you should draw ${object}`);
-                console.log('iniciando jogo para:', id);
+                this.connectedUsers[id.toUpperCase()].client.emit('start-game', {
+                    time: time,
+                    objectDraw: object
+                });
+                this.connectedUsers[id.toUpperCase()].client.emit('send-client-message', `Game has started, you should draw ${object}`);
             });
+
+            setTimeout(async () => {
+                this.usersAwaiting.forEach((id: string) => {
+                    this.connectedUsers[id.toUpperCase()].client.emit('end-game', id);
+                });
+
+                for (const id of this.usersAwaiting) {
+                    const boardImage = this.connectedUsers[id.toUpperCase()].boardImage;
+
+                    Object.keys(this.connectedUsers).map((key: string) => {
+                        this.connectedUsers[key.toUpperCase()].client.emit('vote-board', boardImage);
+                    });
+
+                    await this.timer(10000);
+                }
+            }, time * 1000);
         }
     }
 
