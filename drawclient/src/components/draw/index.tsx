@@ -126,7 +126,7 @@ export const DrawBoard: React.FC<Props> = ({ user, setClient }) => {
     return (
         <Container className='main'>
             <Container className='board'>
-                <Board>
+                <Board canDraw={user.isPlaying}>
                     <canvas id='paint-board' onMouseMove={handleMouseMove} onMouseDown={handleMouseDown} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp} />
                 </Board>
             </Container>
