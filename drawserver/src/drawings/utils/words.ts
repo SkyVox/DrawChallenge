@@ -1,6 +1,6 @@
 
 export const words = [
-    'home',
+    'house',
     'sofa',
     'computer',
     'keyboard',

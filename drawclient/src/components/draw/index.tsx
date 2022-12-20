@@ -27,14 +27,18 @@ export const DrawBoard: React.FC<Props> = ({ user, setClient }) => {
     const handleMouseMove = useCallback((event: any) => {
         if (mouseDown && user.isPlaying) {
             const rect = event.target.getBoundingClientRect();
-            const x = event.clientX - rect.left;
-            const y = event.clientY - rect.top;
+
+            // Get positions
+            const oldX = lastEvent?.clientX - rect.left;
+            const oldY = lastEvent?.clientY - rect.top;
+            const currentX = event.clientX - rect.left;
+            const currentY = event.clientY - rect.top;
 
             const context = event.target.getContext("2d");
 
             context.beginPath();
-            //context.moveTo(x, y);
-            context.lineTo(x, y);
+            context.moveTo(oldX, oldY);
+            context.lineTo(currentX, currentY);
 
             // Line settings.
             context.strokeStyle = settings.color;
@@ -95,8 +99,8 @@ export const DrawBoard: React.FC<Props> = ({ user, setClient }) => {
 
     useEffect(() => {
         if (isMounted) {
-            socket.on('vote-board', ({ imageUrl, userId }) => {
-                showDraw(imageUrl);
+            socket.on('vote-board', ({ boardImage, userId }) => {
+                showDraw(boardImage);
                 setCurrentVoteBoard(userId);
             });
 

@@ -11,7 +11,8 @@ import { words } from './utils/words';
 
 @Injectable()
 export class DrawingsService {
-    private gameTime = 20;
+    private serverBroadcastName = 'SERVER';
+    private gameTime = 60 * 5;
     private viewBoardTimeMS = 5000;
 
     private users: ConnectedUser = {} as ConnectedUser;
@@ -60,7 +61,7 @@ export class DrawingsService {
 
         if (data.message.startsWith('/start')) {
             const message: ClientMessageDto = {
-                user: 'SERVER',
+                user: this.serverBroadcastName,
                 message: null,
                 time: new Date().toLocaleTimeString('pt-BR')
             }
@@ -110,14 +111,13 @@ export class DrawingsService {
             this.queuedUsers.forEach((id: string) => {
                 this.users[id].client.emit('start-game', this.gameStatus);
                 this.sendMessage(this.users[id].client, {
-                    user: 'SERVER',
+                    user: this.serverBroadcastName,
                     message: `Game has started, you should draw ${object}`,
                     time: new Date().toLocaleTimeString('pt-BR')
                 });
             });
 
             setTimeout(async () => {
-                // End Game.
                 this.queuedUsers.forEach((id: string) => this.users[id].client.emit('end-game', id));
 
                 for (const id of this.queuedUsers) {
@@ -130,6 +130,11 @@ export class DrawingsService {
                         });
                     });
 
+                    this.broadcastMessage(server, {
+                        user: this.serverBroadcastName,
+                        message: `Now showing ${this.users[id].name}'s draw!`,
+                        time: new Date().toLocaleTimeString('pt-BR')
+                    });
                     await this.timer(this.viewBoardTimeMS);
                 }
 
@@ -146,7 +151,7 @@ export class DrawingsService {
                     boardImage: winner.boardImage
                 });
                 this.broadcastMessage(server, {
-                    user: 'SERVER',
+                    user: this.serverBroadcastName,
                     message: `${winner.name} won the game with ${winner.votes} votes!`,
                     time: new Date().toLocaleTimeString('pt-BR')
                 });
@@ -160,7 +165,7 @@ export class DrawingsService {
         user.votes = user.votes+=1;
 
         this.sendMessage(client, {
-            user: 'SERVER',
+            user: this.serverBroadcastName,
             message: `You successfully voted for ${user.name}! current votes: ${user.votes}`,
             time: new Date().toLocaleTimeString('pt-BR')
         });
