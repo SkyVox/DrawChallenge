@@ -1,5 +1,9 @@
 import styled from 'styled-components';
 
+export interface BoardParams {
+    canDraw: boolean;
+}
+
 export const Container = styled.div`
     &.main {
         height: 90%;
@@ -21,10 +25,16 @@ export const Container = styled.div`
     }
 `;
 
-export const Board = styled.div`
+export const Board = styled.div<BoardParams>`
     border: 1px solid gray;
     border-radius: 2px;
     background-color: white;
     height: 100%;
     width: 100%;
+
+    ${board => !board.canDraw && {
+        backgroundColor: 'gray',
+        opacity: 0.75,
+        cursor: 'not-allowed',
+    }}}
 `;
