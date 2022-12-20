@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Socket } from 'socket.io';
 import { v4 as uuidv4 } from 'uuid';
+import { CastVoteDto } from './dto/CastVoteDto';
 import { ClientMessageDto, ServerMessageDto } from './dto/MessageDto';
 import { SubmitBoard } from './dto/SubmitBoardDto';
 import { ConnectedUser } from './interfaces/ConnectedUser.interface';
@@ -123,7 +124,10 @@ export class DrawingsService {
                     const boardImage = this.users[id].boardImage;
 
                     Object.keys(this.users).map((key: string) => {
-                        this.users[key].client.emit('vote-board', boardImage);
+                        this.users[key].client.emit('vote-board', {
+                            boardImage,
+                            userId: id
+                        });
                     });
 
                     await this.timer(this.viewBoardTimeMS);
@@ -149,6 +153,17 @@ export class DrawingsService {
                 this.queuedUsers = [];
             }, this.gameTime * 1000);
         }
+    }
+
+    handleCastVote(data: CastVoteDto, client: Socket) {
+        const user = this.users[data.voteCastUserId];
+        user.votes = user.votes+=1;
+
+        this.sendMessage(client, {
+            user: 'SERVER',
+            message: `You successfully voted for ${user.name}! current votes: ${user.votes}`,
+            time: new Date().toLocaleTimeString('pt-BR')
+        });
     }
 
     getWinner(): User {

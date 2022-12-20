@@ -8,4 +8,10 @@ export const Container = styled.div`
     span {
         display: block;
     }
+
+    button {
+        padding: 10px;
+        width: 10rem;
+        height: 50px;
+    }
 `;

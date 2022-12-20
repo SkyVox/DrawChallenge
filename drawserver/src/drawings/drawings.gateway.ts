@@ -1,6 +1,7 @@
 import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
 import { DrawingsService } from './drawings.service';
+import { CastVoteDto } from './dto/CastVoteDto';
 import { ServerMessageDto } from './dto/MessageDto';
 import { SubmitBoard } from './dto/SubmitBoardDto';
 
@@ -24,5 +25,10 @@ export class DrawingsGateway {
   @SubscribeMessage('send-server-message')
   handleChatMessage(@MessageBody() data: ServerMessageDto, @ConnectedSocket() client: Socket) {
     this.drawService.handleChatMessage(data, client, this.server);
+  }
+
+  @SubscribeMessage('cast-vote')
+  handleCastVote(@MessageBody() data: CastVoteDto, @ConnectedSocket() client: Socket) {
+    this.drawService.handleCastVote(data, client);
   }
 }

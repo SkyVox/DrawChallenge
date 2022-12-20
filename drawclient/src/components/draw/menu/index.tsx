@@ -9,6 +9,7 @@ import {
 interface Props {
     user: Client;
     setClient: React.Dispatch<React.SetStateAction<Client>>;
+    currentVoteBoard: string;
 }
 
 enum GameState {
@@ -24,7 +25,7 @@ interface GameSettings {
     gameState: GameState;
 }
 
-export const Menu: React.FC<Props> = ({ user, setClient }) => {
+export const Menu: React.FC<Props> = ({ user, setClient, currentVoteBoard }) => {
     const [ isMounted, setMounted ] = useState<boolean>(false);
     const [ state, setState ] = useState<GameSettings>({} as GameSettings);
     // Vote the drawings.
@@ -43,6 +44,13 @@ export const Menu: React.FC<Props> = ({ user, setClient }) => {
             }
         }
     }, [state]);
+
+    const handleCastVote = useCallback(() => {
+        socket.emit('cast-vote', {
+            userId: user.userId,
+            voteCastUserId: currentVoteBoard
+        });
+    }, [user, currentVoteBoard]);
 
     useEffect(() => {
         if (state && state.time > 0) {
@@ -76,11 +84,21 @@ export const Menu: React.FC<Props> = ({ user, setClient }) => {
 
     return (
         <Container>
-            {state && state.gameState === GameState.STARTED ?
+            {
+                state && state.gameState === GameState.STARTED &&
                 <>
                     <span>Time Remaining: {state.time}s</span>
                     <span>Object to draw: {state.object}</span>
-                </> :
+                </>
+            }
+
+            {
+                state && state.gameState === GameState.VOTING &&
+                <button onClick={handleCastVote}>Vote This Draw</button>
+            }
+
+            {
+                state && (state.gameState === GameState.WAITING || state.gameState === GameState.ENDED) &&
                 <>{getStateDescription()}</>
             }
         </Container>

@@ -15,8 +15,9 @@ export const Container = styled.div`
         margin-top: 10px;
     }
 
-    select, button {
+    select, button.menu-interact {
         height: 25px;
+        margin-right: 10px;
     }
 `;
 

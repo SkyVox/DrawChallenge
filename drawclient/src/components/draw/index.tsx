@@ -22,6 +22,7 @@ export const DrawBoard: React.FC<Props> = ({ user, setClient }) => {
     const [ lastEvent, setLastEvent ] = useState<any>();
     const [ mouseDown, setMouseDown ] = useState<boolean>(false);
     const [ settings, setSettings ] = useState<PaintSettings>({} as PaintSettings);
+    const [ currentVoteBoard, setCurrentVoteBoard ] = useState<string>('');
 
     const handleMouseMove = useCallback((event: any) => {
         if (mouseDown && user.isPlaying) {
@@ -94,7 +95,11 @@ export const DrawBoard: React.FC<Props> = ({ user, setClient }) => {
 
     useEffect(() => {
         if (isMounted) {
-            socket.on('vote-board', (imageUrl: string) => showDraw(imageUrl));
+            socket.on('vote-board', ({ imageUrl, userId }) => {
+                showDraw(imageUrl);
+                setCurrentVoteBoard(userId);
+            });
+
             socket.on('game-winner', ({ boardImage }) => showDraw(boardImage));
         }
     }, [isMounted, user]);
@@ -137,9 +142,9 @@ export const DrawBoard: React.FC<Props> = ({ user, setClient }) => {
                     <option value={10} >10</option>
                     <option value={15} >15</option>
                 </select>
-                <button onClick={handleClear}>Clear</button>
+                <button className='menu-interact' onClick={handleClear}>Clear</button>
 
-                <Menu user={user} setClient={setClient} />
+                <Menu user={user} setClient={setClient} currentVoteBoard={currentVoteBoard} />
             </Container>
         </Container>
     );
