@@ -22,18 +22,23 @@ export const DrawBoard: React.FC<Props> = ({ user, setClient }) => {
     const [ lastEvent, setLastEvent ] = useState<any>();
     const [ mouseDown, setMouseDown ] = useState<boolean>(false);
     const [ settings, setSettings ] = useState<PaintSettings>({} as PaintSettings);
+    const [ currentVoteBoard, setCurrentVoteBoard ] = useState<string>('');
 
     const handleMouseMove = useCallback((event: any) => {
         if (mouseDown && user.isPlaying) {
             const rect = event.target.getBoundingClientRect();
-            const x = event.clientX - rect.left;
-            const y = event.clientY - rect.top;
+
+            // Get positions
+            const oldX = lastEvent?.clientX - rect.left;
+            const oldY = lastEvent?.clientY - rect.top;
+            const currentX = event.clientX - rect.left;
+            const currentY = event.clientY - rect.top;
 
             const context = event.target.getContext("2d");
 
             context.beginPath();
-            //context.moveTo(x, y);
-            context.lineTo(x, y);
+            context.moveTo(oldX, oldY);
+            context.lineTo(currentX, currentY);
 
             // Line settings.
             context.strokeStyle = settings.color;
@@ -46,7 +51,7 @@ export const DrawBoard: React.FC<Props> = ({ user, setClient }) => {
 
             socket.emit('game-submit-board', {
                 userId: user.userId,
-                image: user.boardImage
+                boardImageUrl: user.boardImage
             });
         }
     }, [user, lastEvent, mouseDown, settings]);
@@ -77,22 +82,29 @@ export const DrawBoard: React.FC<Props> = ({ user, setClient }) => {
         }
     }, []);
 
+    const showDraw = useCallback((imageUrl: string) => {
+        const canvas = document.getElementsByTagName('canvas')[0];
+        const context = canvas.getContext("2d");
+
+        if (context) {
+            handleClear();
+            const img = new Image();
+
+            img.onload=function(){
+                context.drawImage(img, 0, 0);
+            }
+            img.src = imageUrl;
+        }
+    }, []);
+
     useEffect(() => {
         if (isMounted) {
-            socket.on('vote-board', (imageUrl: string) => {
-                const canvas = document.getElementsByTagName('canvas')[0];
-                const context = canvas.getContext("2d");
-
-                if (context) {
-                    handleClear();
-                    const img = new Image();
-
-                    img.onload=function(){
-                        context.drawImage(img, 0, 0);
-                    }
-                    img.src = imageUrl;
-                }
+            socket.on('vote-board', ({ boardImage, userId }) => {
+                showDraw(boardImage);
+                setCurrentVoteBoard(userId);
             });
+
+            socket.on('game-winner', ({ boardImage }) => showDraw(boardImage));
         }
     }, [isMounted, user]);
 
@@ -134,9 +146,9 @@ export const DrawBoard: React.FC<Props> = ({ user, setClient }) => {
                     <option value={10} >10</option>
                     <option value={15} >15</option>
                 </select>
-                <button onClick={handleClear}>Clear</button>
+                <button className='menu-interact' onClick={handleClear}>Clear</button>
 
-                <Menu user={user} setClient={setClient} />
+                <Menu user={user} setClient={setClient} currentVoteBoard={currentVoteBoard} />
             </Container>
         </Container>
     );
