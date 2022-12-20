@@ -20,7 +20,7 @@ enum GameState {
 
 interface GameSettings {
     time: number;
-    objectDraw: string;
+    object: string;
     gameState: GameState;
 }
 
@@ -63,6 +63,10 @@ export const Menu: React.FC<Props> = ({ user, setClient }) => {
                 setClient((old) => ({...old, isPlaying: false}));
                 setState((old) => ({...old, gameState: GameState.VOTING}));
             });
+
+            socket.on('game-status', (newState: GameSettings) => {
+                setState(newState);
+            });
         }
     }, [isMounted, user]);
 
@@ -75,7 +79,7 @@ export const Menu: React.FC<Props> = ({ user, setClient }) => {
             {state && state.gameState === GameState.STARTED ?
                 <>
                     <span>Time Remaining: {state.time}s</span>
-                    <span>Object to draw: {state.objectDraw}</span>
+                    <span>Object to draw: {state.object}</span>
                 </> :
                 <>{getStateDescription()}</>
             }

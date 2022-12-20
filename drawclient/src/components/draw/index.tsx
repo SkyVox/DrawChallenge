@@ -46,7 +46,7 @@ export const DrawBoard: React.FC<Props> = ({ user, setClient }) => {
 
             socket.emit('game-submit-board', {
                 userId: user.userId,
-                image: user.boardImage
+                boardImageUrl: user.boardImage
             });
         }
     }, [user, lastEvent, mouseDown, settings]);
@@ -77,22 +77,25 @@ export const DrawBoard: React.FC<Props> = ({ user, setClient }) => {
         }
     }, []);
 
+    const showDraw = useCallback((imageUrl: string) => {
+        const canvas = document.getElementsByTagName('canvas')[0];
+        const context = canvas.getContext("2d");
+
+        if (context) {
+            handleClear();
+            const img = new Image();
+
+            img.onload=function(){
+                context.drawImage(img, 0, 0);
+            }
+            img.src = imageUrl;
+        }
+    }, []);
+
     useEffect(() => {
         if (isMounted) {
-            socket.on('vote-board', (imageUrl: string) => {
-                const canvas = document.getElementsByTagName('canvas')[0];
-                const context = canvas.getContext("2d");
-
-                if (context) {
-                    handleClear();
-                    const img = new Image();
-
-                    img.onload=function(){
-                        context.drawImage(img, 0, 0);
-                    }
-                    img.src = imageUrl;
-                }
-            });
+            socket.on('vote-board', (imageUrl: string) => showDraw(imageUrl));
+            socket.on('game-winner', ({ boardImage }) => showDraw(boardImage));
         }
     }, [isMounted, user]);
 
