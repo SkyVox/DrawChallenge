@@ -15,7 +15,7 @@ export const Messages = styled.div`
     overflow-y: scroll;
 `;
 
-export const Message = styled.span`
+export const ChatMessage = styled.span`
     color: white;
 `;
 

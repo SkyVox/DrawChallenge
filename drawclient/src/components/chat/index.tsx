@@ -4,7 +4,7 @@ import { socket } from '../../shared/socketConnection';
 import {
     Container,
     Messages,
-    Message,
+    ChatMessage,
     MessageUser,
     MessageTime,
     MessageInput,
@@ -61,9 +61,9 @@ export const Chat: React.FC<Props> = ({ user }) => {
                             <MessageTime>
                                 {message.time}
                             </MessageTime>
-                            <Message>
+                            <ChatMessage>
                                 {message.message}
-                            </Message>
+                            </ChatMessage>
                         </div>
                     );
                 })}

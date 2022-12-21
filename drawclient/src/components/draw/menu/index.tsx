@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { GameSettings, GameState } from '..';
 import { Client } from '../../../pages/main';
 import { socket } from '../../../shared/socketConnection';
 
@@ -10,25 +11,12 @@ interface Props {
     user: Client;
     setClient: React.Dispatch<React.SetStateAction<Client>>;
     currentVoteBoard: string;
+    state: GameSettings;
+    setState: React.Dispatch<React.SetStateAction<GameSettings>>;
 }
 
-enum GameState {
-    STARTED,
-    WAITING,
-    VOTING,
-    ENDED
-}
-
-interface GameSettings {
-    time: number;
-    object: string;
-    gameState: GameState;
-}
-
-export const Menu: React.FC<Props> = ({ user, setClient, currentVoteBoard }) => {
+export const Menu: React.FC<Props> = ({ user, setClient, currentVoteBoard, state, setState }) => {
     const [ isMounted, setMounted ] = useState<boolean>(false);
-    const [ state, setState ] = useState<GameSettings>({} as GameSettings);
-    // Vote the drawings.
 
     const getStateDescription = useCallback(() => {
         if (state) {
