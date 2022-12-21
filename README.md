@@ -9,7 +9,7 @@
     - Address to connect: localhost:3000
     
 TODOS:
-    - [ ] - Handle when users disconnect.
+    - [x] - Handle when users disconnect.
     - [x] - Make the page layout.
     - [x] - Min of two players to play.
     - [x] - If lobby has more than two players, choose two random users.

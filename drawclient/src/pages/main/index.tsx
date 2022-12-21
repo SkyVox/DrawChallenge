@@ -43,6 +43,12 @@ export const Main = () => {
     }, [isMounted]);
 
     useEffect(() => {
+        window.onbeforeunload = () => {
+            socket.emit('user-disconnect', client.userId);
+        };
+    }, [client]);
+
+    useEffect(() => {
         setMounted(true);
     }, []);
 

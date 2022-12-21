@@ -1,2 +1,5 @@
 import { io } from 'socket.io-client';
-export const socket = io('http://localhost:1011', { transports : [ 'websocket' ] });
+export const socket = io('http://localhost:1011', {
+    transports : [ 'websocket' ],
+    closeOnBeforeunload: false
+});

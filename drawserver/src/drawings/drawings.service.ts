@@ -66,6 +66,12 @@ export class DrawingsService {
                 time: new Date().toLocaleTimeString('pt-BR')
             }
 
+            if (this.gameStatus.gameState === GameState.STARTED) {
+                message['message'] = 'The game already started! Please wait...';
+                this.sendMessage(client, message);
+                return;
+            }
+
             if (this.queuedUsers.includes(data.userId)) {
                 message['message'] = 'You are already on the queue list. Please wait more users.';
                 this.sendMessage(client, message);
@@ -169,6 +175,22 @@ export class DrawingsService {
             message: `You successfully voted for ${user.name}! current votes: ${user.votes}`,
             time: new Date().toLocaleTimeString('pt-BR')
         });
+    }
+
+    handleUserDisconnect(userId: string, server: any) {
+        if (this.queuedUsers.includes(userId)) {
+            const user = this.users[userId];
+
+            this.queuedUsers = this.queuedUsers.filter((ids: string) => ids !== userId);
+            this.broadcastMessage(server, {
+                user: this.serverBroadcastName,
+                message: `${user.name} left! Queue was updated!`,
+                time: new Date().toLocaleTimeString('pt-BR')
+            });
+        }
+        this.users[userId] = null;
+
+        server.emit('refresh-connected-users', this.getConnectedUserNames());
     }
 
     getWinner(): User {

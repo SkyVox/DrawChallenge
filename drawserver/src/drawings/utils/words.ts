@@ -4,5 +4,6 @@ export const words = [
     'sofa',
     'computer',
     'keyboard',
-    'mouse'
+    'car',
+    'human'
 ];

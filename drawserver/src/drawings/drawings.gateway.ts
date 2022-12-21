@@ -31,4 +31,9 @@ export class DrawingsGateway {
   handleCastVote(@MessageBody() data: CastVoteDto, @ConnectedSocket() client: Socket) {
     this.drawService.handleCastVote(data, client);
   }
+
+  @SubscribeMessage('user-disconnect')
+  hahahehe(@MessageBody() userId: string) {
+    this.drawService.handleUserDisconnect(userId, this.server);
+  }
 }

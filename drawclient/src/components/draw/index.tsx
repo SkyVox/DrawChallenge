@@ -17,12 +17,26 @@ interface PaintSettings {
     width: number;
 }
 
+export enum GameState {
+    STARTED,
+    WAITING,
+    VOTING,
+    ENDED
+}
+
+export interface GameSettings {
+    time: number;
+    object: string;
+    gameState: GameState;
+}
+
 export const DrawBoard: React.FC<Props> = ({ user, setClient }) => {
     const [ isMounted, setMounted ] = useState<boolean>(false);
     const [ lastEvent, setLastEvent ] = useState<any>();
     const [ mouseDown, setMouseDown ] = useState<boolean>(false);
     const [ settings, setSettings ] = useState<PaintSettings>({} as PaintSettings);
     const [ currentVoteBoard, setCurrentVoteBoard ] = useState<string>('');
+    const [ state, setState ] = useState<GameSettings>({} as GameSettings);
 
     const handleMouseMove = useCallback((event: any) => {
         if (mouseDown && user.isPlaying) {
@@ -90,7 +104,7 @@ export const DrawBoard: React.FC<Props> = ({ user, setClient }) => {
             handleClear();
             const img = new Image();
 
-            img.onload=function(){
+            img.onload= () => {
                 context.drawImage(img, 0, 0);
             }
             img.src = imageUrl;
@@ -105,6 +119,14 @@ export const DrawBoard: React.FC<Props> = ({ user, setClient }) => {
             });
 
             socket.on('game-winner', ({ boardImage }) => showDraw(boardImage));
+
+            socket.on('disconnect', () => {
+                setState({
+                    time: 0,
+                    object: '',
+                    gameState: GameState.WAITING
+                });
+            });
         }
     }, [isMounted, user]);
 
@@ -120,14 +142,24 @@ export const DrawBoard: React.FC<Props> = ({ user, setClient }) => {
             color: 'black',
             width: 5
         });
+        setState({
+            time: 0,
+            object: '',
+            gameState: GameState.WAITING
+        });
         setMounted(true);
     }, []);
 
     return (
         <Container className='main'>
             <Container className='board'>
-                <Board canDraw={user.isPlaying}>
-                    <canvas id='paint-board' onMouseMove={handleMouseMove} onMouseDown={handleMouseDown} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp} />
+                <Board canDraw={user.isPlaying && state.gameState === GameState.VOTING}>
+                    <canvas id='paint-board'
+                        onMouseMove={handleMouseMove}
+                        onMouseDown={handleMouseDown}
+                        onMouseUp={handleMouseUp}
+                        onMouseLeave={handleMouseUp}
+                    />
                 </Board>
             </Container>
 
@@ -148,7 +180,13 @@ export const DrawBoard: React.FC<Props> = ({ user, setClient }) => {
                 </select>
                 <button className='menu-interact' onClick={handleClear}>Clear</button>
 
-                <Menu user={user} setClient={setClient} currentVoteBoard={currentVoteBoard} />
+                <Menu
+                    user={user}
+                    setClient={setClient}
+                    currentVoteBoard={currentVoteBoard}
+                    state={state}
+                    setState={setState}
+                />
             </Container>
         </Container>
     );
