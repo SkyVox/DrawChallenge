@@ -116,6 +116,7 @@ export const DrawBoard: React.FC<Props> = ({ user, setClient }) => {
             socket.on('vote-board', ({ boardImage, userId }) => {
                 showDraw(boardImage);
                 setCurrentVoteBoard(userId);
+                setState((old) => ({...old, gameState: GameState.VOTING}));
             });
 
             socket.on('game-winner', ({ boardImage }) => showDraw(boardImage));
@@ -153,7 +154,7 @@ export const DrawBoard: React.FC<Props> = ({ user, setClient }) => {
     return (
         <Container className='main'>
             <Container className='board'>
-                <Board canDraw={user.isPlaying && state.gameState === GameState.VOTING}>
+                <Board canDraw={user.isPlaying || state.gameState === GameState.VOTING}>
                     <canvas id='paint-board'
                         onMouseMove={handleMouseMove}
                         onMouseDown={handleMouseDown}

@@ -6,8 +6,8 @@ export interface GameStatus {
 }
 
 export enum GameState {
-    STARTED,
-    WAITING,
-    VOTING,
-    ENDED
+    STARTED = "STARTED",
+    WAITING = "WAITING",
+    VOTING = "VOTING",
+    ENDED = "ENDED"
 }
