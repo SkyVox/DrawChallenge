@@ -13,7 +13,7 @@ import { words } from './utils/words';
 export class DrawingsService {
     private serverBroadcastName = 'SERVER';
     private gameTime = 60 * 5;
-    private viewBoardTimeMS = 5000;
+    private viewBoardTimeMS = 30000;
 
     private users: ConnectedUser = {} as ConnectedUser;
     private queuedUsers: Array<string> = [];
@@ -52,7 +52,7 @@ export class DrawingsService {
         server.emit('refresh-connected-users', connectedUsers);
 
         if (this.gameStatus.gameState === GameState.STARTED) {
-            server.emit('game-status', this.gameStatus.gameState);
+            server.emit('game-status', this.gameStatus);
         }
     }
 
@@ -152,7 +152,7 @@ export class DrawingsService {
 
                 const winner = this.getWinner();
 
-                server.emit('game-status', this.gameStatus.gameState);
+                server.emit('game-status', this.gameStatus);
                 server.emit('game-winner', {
                     boardImage: winner.boardImage
                 });

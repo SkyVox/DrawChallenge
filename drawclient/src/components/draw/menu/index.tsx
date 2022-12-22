@@ -7,6 +7,12 @@ import {
     Container
 } from './styles';
 
+interface UpdateStatus {
+    time: number;
+    object: string;
+    gameState: "STARTED" | "WAITING" | "VOTING" | "ENDED";
+}
+
 interface Props {
     user: Client;
     setClient: React.Dispatch<React.SetStateAction<Client>>;
@@ -60,8 +66,12 @@ export const Menu: React.FC<Props> = ({ user, setClient, currentVoteBoard, state
                 setState((old) => ({...old, gameState: GameState.VOTING}));
             });
 
-            socket.on('game-status', (newState: GameSettings) => {
-                setState(newState);
+            socket.on('game-status', ({ time, object, gameState }: UpdateStatus) => {
+                setState({
+                    time,
+                    object,
+                    gameState: GameState[gameState]
+                });
             });
         }
     }, [isMounted, user]);
